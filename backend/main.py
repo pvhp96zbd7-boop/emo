@@ -38,7 +38,7 @@ INFO_OPTS = {
                    'AppleWebKit/537.36 (KHTML, like Gecko) '
                    'Chrome/120.0.0.0 Safari/537.36'),
     'extractor_args': {'youtube': {
-       'player_client': ['tv_embedded', 'mweb', 'web_safari', 'ios'] 
+        'player_client': ['ios', 'android', 'web', 'tv']
     }},
 }
 LIST_OPTS = {**INFO_OPTS, 'extract_flat': 'in_playlist', 'skip_download': True}
@@ -182,9 +182,7 @@ async def refresh_wave():
 async def stream(vid: str, request: Request):
     try:
         data = get_stream(vid)
-        print(f"[YTDL] Стрим запрошен для {vid}, статус ок", flush=True)
     except Exception as e:
-        print(f"[YTDL ERROR] resolve failed: {e}", flush=True)
         raise HTTPException(500, f"resolve failed: {e}")
     if not data.get('url'):
         raise HTTPException(502, "no audio stream")
