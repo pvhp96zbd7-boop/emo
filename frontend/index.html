@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Эмма</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+:root{--bg:#0a0a0a;--panel:#141414;--panel2:#1c1c1c;--text:#f5f5f5;--muted:#8a8a8a;--accent:#1db954}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100dvh;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none}
+body{display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+header{padding:calc(env(safe-area-inset-top) + 14px) 20px 14px;display:flex;
+  align-items:center;justify-content:space-between;border-bottom:1px solid #1c1c1c;
+  position:sticky;top:0;background:rgba(10,10,10,.95);backdrop-filter:blur(12px);z-index:10}
+h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-.5px}
+h1 span{color:var(--accent)}
+main{flex:1;overflow-y:auto;padding-bottom:180px}
+.tab{display:none;padding:16px 16px 0}.tab.active{display:block}
+.wave-hero{background:linear-gradient(135deg,#1db954 0%,#0d5c2c 100%);
+  border-radius:20px;padding:32px 24px;margin-bottom:24px;position:relative;overflow:hidden}
+.wave-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;
+  height:200px;background:rgba(255,255,255,.08);border-radius:50%}
+.wave-title{font-size:13px;text-transform:uppercase;letter-spacing:2px;opacity:.85;margin-bottom:6px}
+.wave-big{font-size:34px;font-weight:800;margin:0 0 20px;line-height:1}
+.play-btn{background:#000;color:#fff;border:none;padding:14px 32px;border-radius:100px;
+  font-size:16px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px}
+.play-btn:active{transform:scale(.96)}
+.section-title{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--muted);margin:20px 0 12px}
+.track{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;cursor:pointer}
+.track:active,.track.playing{background:var(--panel2)}
+.track img{width:52px;height:52px;border-radius:6px;object-fit:cover;
+  background:var(--panel2);flex-shrink:0}
+.track-info{flex:1;min-width:0}
+.track-title{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-bottom:3px}
+.track-artist{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.track-dur{font-size:12px;color:var(--muted);flex-shrink:0}
+.like-btn{background:none;border:none;padding:8px;cursor:pointer;font-size:20px;
+  color:var(--muted);flex-shrink:0}
+.like-btn.liked{color:var(--accent)}
+.add-form{padding:8px 0}
+.add-input{width:100%;padding:16px;background:var(--panel);border:1px solid #2a2a2a;
+  border-radius:12px;color:var(--text);font-size:15px;margin-bottom:12px;font-family:inherit}
+.add-input:focus{outline:none;border-color:var(--accent)}
+.add-btn{width:100%;padding:16px;background:var(--accent);color:#000;border:none;
+  border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.add-btn:disabled{opacity:.5}
+.add-status{padding:16px;font-size:14px;color:var(--muted);text-align:center}
+nav.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,.98);
+  border-top:1px solid #1c1c1c;display:flex;
+  height:calc(56px + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);z-index:15}
+.nav-btn{flex:1;background:none;border:none;color:var(--muted);font-size:11px;
+  padding:8px;cursor:pointer;font-weight:500}
+.nav-btn.active{color:var(--text)}
+.mini-player{position:fixed;bottom:calc(56px + env(safe-area-inset-bottom));
+  left:0;right:0;background:rgba(20,20,20,.98);backdrop-filter:blur(20px);
+  border-top:1px solid #222;padding:10px 16px;
+  display:none;align-items:center;gap:12px;z-index:14}
+.mini-player.visible{display:flex}
+.mini-player img{width:44px;height:44px;border-radius:4px;background:#222}
+.mini-info{flex:1;min-width:0}
+.mini-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.mini-artist{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.mini-btn{background:none;border:none;color:var(--text);font-size:22px;padding:4px;cursor:pointer}
+.progress-mini{position:absolute;top:0;left:0;right:0;height:2px;background:#222}
+.progress-mini-fill{height:100%;background:var(--accent);width:0%}
+.full-player{position:fixed;inset:0;background:var(--bg);z-index:100;
+  display:none;flex-direction:column;
+  padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom)}
+.full-player.visible{display:flex}
+.full-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+.full-close{background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
+.full-art{width:min(70vw,320px);aspect-ratio:1;border-radius:12px;margin:20px auto;
+  background:var(--panel2);object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.full-info{text-align:center;padding:0 20px}
+.full-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.full-artist{font-size:16px;color:var(--muted)}
+.full-progress{margin:30px 0 10px}
+.full-progress-bar{height:4px;background:#2a2a2a;border-radius:2px;
+  position:relative;cursor:pointer}
+.full-progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%}
+.full-time{display:flex;justify-content:space-between;font-size:12px;
+  color:var(--muted);margin-top:8px}
+.full-controls{display:flex;justify-content:center;align-items:center;gap:32px;padding:20px 0}
+.full-btn{background:none;border:none;color:var(--text);font-size:32px;cursor:pointer}
+.full-btn.play-big{font-size:56px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Эм<span>ма</span></h1>
+  <div style="font-size:12px;color:var(--muted)">●</div>
+</header>
+<main>
+  <div class="tab active" id="tab-wave">
+    <div class="wave-hero">
+      <div class="wave-title">Персональная</div>
+      <div class="wave-big">Волна</div>
+      <button class="play-btn" onclick="playWave()">▶ PLAY</button>
+    </div>
+    <div class="section-title">Сейчас в волне</div>
+    <div id="wave-list"></div>
+  </div>
+  <div class="tab" id="tab-liked">
+    <div class="section-title">Моё любимое</div>
+    <div id="liked-list"></div>
+  </div>
+  <div class="tab" id="tab-add">
+    <div class="add-form">
+      <div class="section-title" style="margin-top:0">Добавить музыку</div>
+      <input type="url" class="add-input" id="add-url"
+        placeholder="Ссылка на видео / плейлист / канал YouTube" autocomplete="off">
+      <button class="add-btn" id="add-btn" onclick="addMusic()">Добавить</button>
+      <div class="add-status" id="add-status"></div>
+    </div>
+  </div>
+</main>
+<div class="mini-player" id="mini" onclick="openFull()">
+  <div class="progress-mini"><div class="progress-mini-fill" id="mini-progress"></div></div>
+  <img id="mini-thumb" src="">
+  <div class="mini-info">
+    <div class="mini-title" id="mini-title">—</div>
+    <div class="mini-artist" id="mini-artist">—</div>
+  </div>
+  <button class="mini-btn" id="mini-play" onclick="event.stopPropagation();togglePlay()">▶</button>
+</div>
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-tab="wave" onclick="switchTab('wave')">Волна</button>
+  <button class="nav-btn" data-tab="liked" onclick="switchTab('liked')">Моё</button>
+  <button class="nav-btn" data-tab="add" onclick="switchTab('add')">Добавить</button>
+</nav>
+
+<div class="full-player" id="full">
+  <div class="full-header">
+    <button class="full-close" onclick="closeFull()">⌄</button>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px">Сейчас играет</div>
+    <div style="width:32px"></div>
+  </div>
+  <img class="full-art" id="full-thumb" src="">
+  <div class="full-info">
+    <div class="full-title" id="full-title">—</div>
+    <div class="full-artist" id="full-artist">—</div>
+  </div>
+  <div class="full-progress">
+    <div class="full-progress-bar" id="progress-bar"><div class="full-progress-fill" id="progress-fill"></div></div>
+    <div class="full-time"><span id="cur-time">0:00</span><span id="total-time">0:00</span></div>
+  </div>
+  <div class="full-controls">
+    <button class="full-btn" onclick="prev()">⏮</button>
+    <button class="full-btn play-big" id="full-play" onclick="togglePlay()">▶</button>
+    <button class="full-btn" onclick="next()">⏭</button>
+  </div>
+</div>
+
+<audio id="audio" preload="metadata" playsinline></audio>
+
+<script>
+const API = location.origin;
+const audio = document.getElementById('audio');
+let queue = [], currentIdx = 0, currentTrack = null;
+let likedIds = new Set();
+
+const fmt = s => s ? `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}` : '0:00';
+const esc = s => String(s||'').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab === name);
+  });
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='wave') loadWave();
+  if(name==='liked') loadLibrary();
+}
+
+async function loadWave(){
+  const list = document.getElementById('wave-list');
+  list.innerHTML = '<div class="add-status">Загрузка волны…</div>';
+  try {
+    const tracks = await (await fetch(API+'/api/wave')).json();
+    queue = tracks;
+    renderList(tracks, list);
+  } catch(e){ list.innerHTML = '<div class="add-status">Ошибка загрузки</div>'; }
+}
+
+async function loadLibrary(){
+  const list = document.getElementById('liked-list');
+  list.innerHTML = '<div class="add-status">Загрузка…</div>';
+  try {
+    const tracks = await (await fetch(API+'/api/tracks')).json();
+    if(!tracks.length){
+      list.innerHTML = '<div class="add-status">Пусто. Добавь музыку во вкладке «Добавить».</div>';
+      return;
+    }
+    renderList(tracks, list);
+  } catch(e){ list.innerHTML = '<div class="add-status">Ошибка загрузки</div>'; }
+}
+
+async function loadLikedIds(){
+  try {
+    const t = await (await fetch(API+'/api/liked')).json();
+    likedIds = new Set(t.map(x=>x.id));
+  } catch(e){}
+}
+
+function renderList(tracks, container){
+  container.innerHTML = '';
+  tracks.forEach((t,i)=>{
+    const liked = likedIds.has(t.id);
+    const d = document.createElement('div');
+    d.className = 'track';
+    d.dataset.idx = i;
+    d.innerHTML = `
+      <img src="${t.thumbnail||''}" loading="lazy"
+        onerror="this.style.background='#222';this.src=''">
+      <div class="track-info">
+        <div class="track-title">${esc(t.title)}</div>
+        <div class="track-artist">${esc(t.artist||'')}</div>
+      </div>
+      <div class="track-dur">${fmt(t.duration)}</div>
+      <button class="like-btn ${liked?'liked':''}">${liked?'♥':'♡'}</button>`;
+    d.querySelector('.track-info').onclick = () => playAt(i, tracks);
+    d.querySelector('img').onclick = () => playAt(i, tracks);
+    d.querySelector('.like-btn').onclick = e => {
+      e.stopPropagation();
+      toggleLike(t.id, e.currentTarget);
+    };
+    container.appendChild(d);
+  });
+}
+
+function playAt(i, tracks){ queue = tracks; currentIdx = i; playTrack(tracks[i]); }
+function playWave(){ if(!queue.length) return; currentIdx = 0; playTrack(queue[0]); }
+
+function playTrack(track){
+  if(!track) return;
+  currentTrack = track;
+  audio.src = `${API}/api/stream/${track.id}`;
+  audio.play().catch(e=>console.warn('play', e));
+
+  document.getElementById('mini-thumb').src = track.thumbnail||'';
+  document.getElementById('mini-title').textContent = track.title;
+  document.getElementById('mini-artist').textContent = track.artist||'';
+  document.getElementById('mini').classList.add('visible');
+  document.getElementById('full-thumb').src = track.thumbnail||'';
+  document.getElementById('full-title').textContent = track.title;
+  document.getElementById('full-artist').textContent = track.artist||'';
+
+  if('mediaSession' in navigator){
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title, artist: track.artist||'', album: 'Эмма',
+      artwork: track.thumbnail ? [{src: track.thumbnail, sizes:'512x512', type:'image/jpeg'}] : []
+    });
+  }
+}
+
+function togglePlay(){
+  if(!currentTrack) return;
+  if(audio.paused) audio.play(); else audio.pause();
+}
+
+function next(){ if(!queue.length) return; currentIdx = (currentIdx+1)%queue.length; playTrack(queue[currentIdx]); }
+function prev(){
+  if(!queue.length) return;
+  if(audio.currentTime>3){ audio.currentTime = 0; return; }
+  currentIdx = (currentIdx-1+queue.length)%queue.length;
+  playTrack(queue[currentIdx]);
+}
+
+audio.addEventListener('ended', next);
+audio.addEventListener('play', ()=>{
+  document.getElementById('mini-play').textContent='⏸';
+  document.getElementById('full-play').textContent='⏸';
+});
+audio.addEventListener('pause', ()=>{
+  document.getElementById('mini-play').textContent='▶';
+  document.getElementById('full-play').textContent='▶';
+});
+audio.addEventListener('timeupdate', ()=>{
+  const pct = audio.duration ? (audio.currentTime/audio.duration)*100 : 0;
+  document.getElementById('mini-progress').style.width = pct+'%';
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('cur-time').textContent = fmt(audio.currentTime);
+  document.getElementById('total-time').textContent = fmt(audio.duration);
+  if('mediaSession' in navigator && audio.duration){
+    try { navigator.mediaSession.setPositionState({
+      duration: audio.duration, playbackRate: audio.playbackRate,
+      position: audio.currentTime
+    }); } catch(e){}
+  }
+});
+
+if('mediaSession' in navigator){
+  navigator.mediaSession.setActionHandler('play', ()=>audio.play());
+  navigator.mediaSession.setActionHandler('pause', ()=>audio.pause());
+  navigator.mediaSession.setActionHandler('nexttrack', next);
+  navigator.mediaSession.setActionHandler('previoustrack', prev);
+  navigator.mediaSession.setActionHandler('seekto', d=>{
+    if(d.seekTime !== undefined) audio.currentTime = d.seekTime;
+  });
+}
+
+document.getElementById('progress-bar').addEventListener('click', e=>{
+  const r = e.currentTarget.getBoundingClientRect();
+  if(audio.duration) audio.currentTime = ((e.clientX-r.left)/r.width)*audio.duration;
+});
+
+function openFull(){ if(currentTrack) document.getElementById('full').classList.add('visible'); }
+function closeFull(){ document.getElementById('full').classList.remove('visible'); }
+
+async function toggleLike(id, btn){
+  if(likedIds.has(id)){
+    await fetch(`${API}/api/like/${id}`,{method:'DELETE'});
+    likedIds.delete(id); btn.classList.remove('liked'); btn.textContent='♡';
+  } else {
+    await fetch(`${API}/api/like/${id}`,{method:'POST'});
+    likedIds.add(id); btn.classList.add('liked'); btn.textContent='♥';
+  }
+}
+
+async function addMusic(){
+  const input = document.getElementById('add-url');
+  const btn = document.getElementById('add-btn');
+  const status = document.getElementById('add-status');
+  const url = input.value.trim();
+  if(!url) return;
+  btn.disabled = true;
+  status.textContent = 'Обрабатываю… (плейлисты могут занять минуту)';
+  try {
+    const r = await fetch(API+'/api/add',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({url})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.detail || 'error');
+    status.textContent = `✓ Добавлено треков: ${d.added}`;
+    input.value = '';
+  } catch(e){
+    status.textContent = '✗ ' + (e.message||'ошибка');
+  } finally { btn.disabled = false; }
+}
+
+window.addEventListener('load', async ()=>{
+  await loadLikedIds();
+  loadWave();
+  fetch(API+'/api/refresh-wave',{method:'POST'}).catch(()=>{});
+  if('serviceWorker' in navigator){
+    try{ await navigator.serviceWorker.register('/sw.js'); }catch(e){}
+  }
+});
+</script>
+</body>
+</html>
