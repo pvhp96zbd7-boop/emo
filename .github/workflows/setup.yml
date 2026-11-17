@@ -1,0 +1,15 @@
+name: Generate Files
+on: [push, workflow_dispatch]
+permissions: write-all
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: bash setup.sh
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-generate backend and frontend" || exit 0
+          git push
