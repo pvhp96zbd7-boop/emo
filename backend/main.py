@@ -38,7 +38,7 @@ INFO_OPTS = {
                    'AppleWebKit/537.36 (KHTML, like Gecko) '
                    'Chrome/120.0.0.0 Safari/537.36'),
     'extractor_args': {'youtube': {
-        'player_client': ['ios', 'android', 'web', 'tv']
+        'player_client': ['android_vr', 'ios']
     }},
 }
 LIST_OPTS = {**INFO_OPTS, 'extract_flat': 'in_playlist', 'skip_download': True}
