@@ -41,7 +41,7 @@ INFO_OPTS = {
         'player_client': ['ios', 'android', 'web', 'tv']
     }},
 }
-LIST_OPTS = {**INFO_OPTS, 'extract_flat': 'in_playlist', 'skip_download': True}
+LIST_OPTS = {**INFO_OPTS, 'extract_flat': 'in_playlist', 'skip_download': True'noplaylist': False}
 
 def resolve_stream(vid: str) -> dict:
     url = f"https://www.youtube.com/watch?v={vid}"
